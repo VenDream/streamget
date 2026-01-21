@@ -101,10 +101,14 @@ def wrap_stream(data: dict) -> StreamData:
     required_fields = [
         "platform", "anchor_name", "is_live", "title", "quality", "m3u8_url", "flv_url", "record_url", "live_url"
     ]
-    optional_fields = ["new_cookies", "new_token"]
+    optional_fields = ["new_cookies", "new_token", "extra"]
+    valid_fields = set(required_fields + optional_fields)
 
     for field in required_fields + optional_fields:
         if field not in data:
             data[field] = None
 
-    return StreamData(**data)
+    # 过滤掉 StreamData 不支持的字段
+    filtered_data = {k: v for k, v in data.items() if k in valid_fields}
+
+    return StreamData(**filtered_data)

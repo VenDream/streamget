@@ -3,6 +3,8 @@ import json
 import re
 import time
 
+from loguru import logger
+
 from ...data import StreamData, wrap_stream
 from ...requests.async_http import async_req
 from ..base import BaseLiveStream
@@ -112,6 +114,25 @@ class DouyuLiveStream(BaseLiveStream):
             proxy_addr=self.proxy_addr,
             headers=self.base_headers
         )
+
+        # 检测是否返回了 HTML 错误页（房间已关闭等情况），降级为 App 接口
+        if not json_str or json_str.startswith('<!DOCTYPE') or json_str.startswith('<html'):
+            logger.warning(f"Douyu web API returned HTML error page for rid={rid}, falling back to app API")
+            try:
+                app_data = await self.fetch_app_stream_data(url, process_data)
+                if app_data and app_data.get('anchor_name'):
+                    app_data['room_id'] = rid
+                    return app_data
+            except Exception as e:
+                logger.warning(f"Douyu app API fallback also failed for rid={rid}: {e}")
+            return {
+                "anchor_name": "",
+                "is_live": False,
+                "live_url": url,
+                "room_id": rid,
+                "title": "",
+            }
+
         json_data = json.loads(json_str)['room']
 
         if not process_data:
