@@ -37,11 +37,8 @@ class LianJieLiveStream(BaseLiveStream):
         result = {"anchor_name": anchor_name, "is_live": False, "live_url": url}
         if live_status == 1:
             title = room_data['defaultRoomTitle']
-            webrtc_url = room_data['videoUrl']
-            https_url = "https://" + webrtc_url.split('webrtc://')[1]
-            flv_url = https_url.replace('?', '.flv?')
-            m3u8_url = https_url.replace('?', '.m3u8?')
-            result |= {'is_live': True, 'title': title, 'm3u8_url': m3u8_url, 'flv_url': flv_url, 'record_url': flv_url}
+            flv_url = room_data['videoUrl']
+            result |= {'is_live': True, 'title': title, 'flv_url': flv_url, 'record_url': flv_url}
         return result
 
     @staticmethod
