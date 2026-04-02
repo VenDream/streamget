@@ -92,7 +92,7 @@ StreamData(platform='xxxx', anchor_name='xxxx', is_live=True, m3u8_url="xxx"...)
 | 花猫直播    | ✅              | ✅           | ❌           |             |                  |
 | Shopee      | ✅              | ❌           | ✅           |             |                  |
 | YouTube     | ✅              | ✅           | ❌           | ✅           |                  |
-| 淘宝        | ✅              | ✅           | ✅           | ✅           | ✅                |
+| 淘宝        | ✅              | ✅           | ✅           | ✅           |                  |
 | 京东        | ✅              | ✅           | ✅           |             |                  |
 | Faceit      | ✅              | ✅           | ❌           |             |                  |
 | 连接直播    | ✅              | ✅           | ✅           |             |                  |
