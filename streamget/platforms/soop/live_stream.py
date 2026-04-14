@@ -119,7 +119,8 @@ class SoopLiveStream(BaseLiveStream):
             status = json_data['CHANNEL'].get('VIEWPRESET')
             title = json_data['CHANNEL'].get('TITLE')
             result_code = json_data['CHANNEL'].get('RESULT')
-            return result_code, status, title
+            broad_no = json_data['CHANNEL'].get('BNO')
+            return result_code, status, title, broad_no
 
     async def _get_url_list(self, m3u8: str) -> list[str]:
         headers = {
@@ -128,7 +129,7 @@ class SoopLiveStream(BaseLiveStream):
         }
         resp = await async_req(url=m3u8, proxy_addr=self.proxy_addr, headers=headers)
         play_url_list = []
-        url_prefix = '/'.join(m3u8.split('/')[0:3])
+        url_prefix = m3u8.rsplit('/', maxsplit=1)[0]
         for i in resp.split('\n'):
             if not i.startswith('#') and i.strip():
                 play_url_list.append(url_prefix + '/' + i.strip())
@@ -151,13 +152,12 @@ class SoopLiveStream(BaseLiveStream):
         """
         split_url = url.split('/')
         bj_id = split_url[3] if len(split_url) < 6 else split_url[5]
-        broad_no = url.split('?')[0].rsplit('/', maxsplit=1)[-1]
         nickname = await self.get_sooplive_user_nick(bj_id)
         result = {"anchor_name": f"{nickname}-{bj_id}", "is_live": False, "live_url": url}
-        result_code, status, title = await self.get_sooplive_tk(url)
+        result_code, status, title, broad_no = await self.get_sooplive_tk(url)
         if result_code not in [0, 1]:
             new_cookies = await self.login_sooplive()
-            result_code, status, title = await self.get_sooplive_tk(url)
+            result_code, status, title, broad_no = await self.get_sooplive_tk(url)
             result['new_cookies'] = new_cookies
 
         if status:
