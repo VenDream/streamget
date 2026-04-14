@@ -59,6 +59,7 @@ from .platforms.twitch.live_stream import TwitchLiveStream
 from .platforms.vvxq.live_stream import VVXQLiveStream
 from .platforms.weibo.live_stream import WeiboLiveStream
 from .platforms.winktv.live_stream import WinkTVLiveStream
+from .platforms.xindongrebo.live_stream import XindongreboLiveStream
 from .platforms.yinbo.live_stream import YinboLiveStream
 from .platforms.yiqilive.live_stream import YiqiLiveStream
 from .platforms.youtube.live_stream import YoutubeLiveStream
@@ -112,6 +113,7 @@ __all__ = [
     "VVXQLiveStream",
     "WeiboLiveStream",
     "WinkTVLiveStream",
+    "XindongreboLiveStream",
     "YYLiveStream",
     "YinboLiveStream",
     "YiqiLiveStream",

@@ -1,13 +1,13 @@
-import json
+import re
 
 from ...data import StreamData, wrap_stream
 from ...requests.async_http import async_req
 from ..base import BaseLiveStream
 
 
-class LianJieLiveStream(BaseLiveStream):
+class XindongreboLiveStream(BaseLiveStream):
     """
-    A class for fetching and processing Yinbo live stream information.
+    A class for fetching and processing Xindongrebo live stream information.
     """
     def __init__(self, proxy_addr: str | None = None, cookies: str | None = None):
         super().__init__(proxy_addr, cookies)
@@ -24,21 +24,22 @@ class LianJieLiveStream(BaseLiveStream):
         Returns:
             dict: A dictionary containing anchor name, live status, room URL, and title.
         """
-        room_id = url.split('?')[0].rsplit('lailianjie.com/', maxsplit=1)[-1]
-        play_api = f'https://api.lailianjie.com/ApiServices/service/live/getRoomInfo?&_$t=&_sign=&roomNumber={room_id}'
-        json_str = await async_req(play_api, proxy_addr=self.proxy_addr, headers=self.pc_headers)
-        json_data = json.loads(json_str)
-        if not process_data:
-            return json_data
-        room_data = json_data['data']
-        anchor_name = room_data['nickname']
-        live_status = room_data['isonline']
+        html_str = await async_req(url=url, proxy_addr=self.proxy_addr, headers=self.pc_headers)
+        data = re.search('var user = (.*?)\r\n\\s+user\\.play_url', html_str, re.DOTALL).group(1)
+        anchor_name = re.findall('"zb_nickname": "(.*?)",\r\n', data)
 
-        result = {"anchor_name": anchor_name, "is_live": False, "live_url": url}
-        if live_status == 1:
-            title = room_data['defaultRoomTitle']
-            flv_url = room_data['videoUrl']
-            result |= {'is_live': True, 'title': title, 'flv_url': flv_url, 'record_url': flv_url}
+        result = {"anchor_name": "", "is_live": False, "live_url": url}
+        if len(anchor_name) > 0:
+            result['anchor_name'] = anchor_name[0]
+            play_url = re.findall('"play_url": "(.*?)",\r\n', data)
+
+            if len(play_url) > 0 and 'common-text-center" style="display:block' not in html_str:
+                result |= {
+                    'anchor_name': anchor_name[0],
+                    'is_live': True,
+                    'flv_url': play_url[0],
+                    'record_url': play_url[0]
+                }
         return result
 
     @staticmethod
@@ -46,5 +47,5 @@ class LianJieLiveStream(BaseLiveStream):
         """
         Fetches the stream URL for a live room and wraps it into a StreamData object.
         """
-        json_data |= {"platform": "连接直播"}
+        json_data |= {"platform": "心动热播直播"}
         return wrap_stream(json_data)

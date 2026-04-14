@@ -37,16 +37,10 @@ class ZhihuLiveStream(BaseLiveStream):
         """
 
         result = {"anchor_name": '', "is_live": False, "live_url": url}
-        if 'people/' in url:
-            user_id = url.split('people/')[1]
-            api = f'https://api.zhihu.com/people/{user_id}/profile?profile_new_version='
-            json_str = await async_req(api, proxy_addr=self.proxy_addr, headers=self.mobile_headers)
-            json_data = json.loads(json_str)
-            result['anchor_name'] = json_data['name']
-            live_page_url = json_data['drama']['living_theater']['theater_url']
-        else:
-            live_page_url = url
+        if '/theater/' not in url:
+            raise RuntimeError("Unsupported URL. Please use live page URL")
 
+        live_page_url = url
         web_id = live_page_url.split('?')[0].rsplit('/', maxsplit=1)[-1]
         html_str = await async_req(live_page_url, proxy_addr=self.proxy_addr, headers=self.mobile_headers)
         json_str2 = re.search('<script id="js-initialData" type="text/json">(.*?)</script>', html_str)
